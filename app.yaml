@@ -6,6 +6,7 @@ services:
   environment_slug: node-js
   instance_count: 1
   instance_size_slug: basic-xxs
+  http_port: 8080
   routes:
   - path: /
   health_check:

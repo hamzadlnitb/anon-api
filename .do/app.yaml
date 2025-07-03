@@ -1,0 +1,28 @@
+name: anon-api
+services:
+- name: api
+  source_dir: /
+  github:
+    repo: your-repo/anon-api
+    branch: main
+  run_command: npm start
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  routes:
+  - path: /
+  health_check:
+    http_path: /api/dashboard/stats
+  cors:
+    allow_origins:
+    - exact: https://your-frontend-domain.com
+    - prefix: https://
+    allow_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+    allow_headers:
+    - Content-Type
+    - Authorization

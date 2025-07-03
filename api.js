@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const { Client } = require('pg');
 
+// Set timezone to UTC+7 (Asia/Jakarta)
+process.env.TZ = 'Asia/Jakarta';
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -66,7 +69,7 @@ app.get('/api/dashboard/stats', async (_, res) => {
         COUNT(CASE WHEN status = 'active' THEN 1 END) as active_conversations,
         COUNT(CASE WHEN status = 'ended' THEN 1 END) as ended_conversations,
         AVG(message_count) as avg_messages_per_conversation,
-        COUNT(CASE WHEN DATE(started_at) = CURRENT_DATE THEN 1 END) as conversations_today
+        COUNT(CASE WHEN DATE(started_at AT TIME ZONE 'Asia/Jakarta') = CURRENT_DATE THEN 1 END) as conversations_today
       FROM conversations
     `;
     
@@ -87,11 +90,11 @@ app.get('/api/dashboard/stats', async (_, res) => {
 
     const dailyMessagesQuery = `
       SELECT 
-        DATE(timestamp) as message_date,
+        DATE(timestamp AT TIME ZONE 'Asia/Jakarta') as message_date,
         COUNT(*) as daily_messages
       FROM chat_logs 
       WHERE timestamp >= NOW() - INTERVAL '7 days'
-      GROUP BY DATE(timestamp)
+      GROUP BY DATE(timestamp AT TIME ZONE 'Asia/Jakarta')
       ORDER BY message_date DESC
       LIMIT 7
     `;
@@ -700,33 +703,33 @@ app.get('/api/analytics/usage', async (req, res) => {
     // Daily conversations
     const conversationsQuery = `
       SELECT 
-        DATE(started_at) as date,
+        DATE(started_at AT TIME ZONE 'Asia/Jakarta') as date,
         COUNT(*) as new_conversations
       FROM conversations 
       WHERE started_at >= NOW() - INTERVAL '${days} days'
-      GROUP BY DATE(started_at)
+      GROUP BY DATE(started_at AT TIME ZONE 'Asia/Jakarta')
       ORDER BY date DESC
     `;
     
     // Daily messages
     const messagesQuery = `
       SELECT 
-        DATE(timestamp) as date,
+        DATE(timestamp AT TIME ZONE 'Asia/Jakarta') as date,
         COUNT(*) as messages
       FROM chat_logs 
       WHERE timestamp >= NOW() - INTERVAL '${days} days'
-      GROUP BY DATE(timestamp)
+      GROUP BY DATE(timestamp AT TIME ZONE 'Asia/Jakarta')
       ORDER BY date DESC
     `;
     
     // Active users (users who sent messages)
     const activeUsersQuery = `
       SELECT 
-        DATE(timestamp) as date,
+        DATE(timestamp AT TIME ZONE 'Asia/Jakarta') as date,
         COUNT(DISTINCT sender_user_id) as active_users
       FROM chat_logs 
       WHERE timestamp >= NOW() - INTERVAL '${days} days'
-      GROUP BY DATE(timestamp)
+      GROUP BY DATE(timestamp AT TIME ZONE 'Asia/Jakarta')
       ORDER BY date DESC
     `;
     
